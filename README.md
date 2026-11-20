@@ -1,20 +1,14 @@
 # Huecue 🎨
 
-**Your next palette is already in the picture.**
+Huecue extracts color palettes from photos, illustrations, and UI screenshots. Use the colors in interfaces, presentations, or brand moodboards.
 
-That sunset. That illustration. That screenshot you keep coming back to. Give Huecue an image and take its colors into your next interface, presentation, or brand moodboard.
+It works as a Codex skill or a Python command-line tool. Images are processed on your computer with Pillow; extraction needs no network connection or API key.
 
-🖼️ **See the match** — your image and palette, side by side.
+- 🖼️ Compare the image and palette side by side.
+- 📋 Copy HEX/RGB values or export CSS variables and JSON.
+- 🎯 Choose a palette for design, dominant colors, or sampled colors.
 
-📋 **Grab the colors** — copyable HEX/RGB, plus CSS and JSON exports.
-
-🎯 **Pick your intent** — design inspiration, dominant colors, or sampled colors.
-
-🏡 **Keep it on your computer** — extraction runs offline with Python + Pillow. No API keys or MCP server.
-
-*Hue + cue: a little color inspiration, ready to use.*
-
-## A few colorful examples 🖼️
+## Examples 🖼️
 
 ### Illustration · general mode
 
@@ -64,7 +58,7 @@ That sunset. That illustration. That screenshot you keep coming back to. Give Hu
 
 The landscape and portrait are **AI-generated demo images**, not camera photographs. See [image provenance and prompts](examples/PROVENANCE.md). Each output folder contains copyable `palette.json` and `palette.css` files.
 
-## Meet your next palette ✨
+## Quick start ✨
 
 Requires Python 3.11+ on macOS or Linux. Windows is not currently supported (the input-file safeguards use POSIX flags).
 
@@ -93,7 +87,7 @@ The output root must already exist. Every run creates a fresh `palette-*` folder
 
 The command prints JSON with the new folder path. Colors are sorted by estimated share.
 
-## Bring Huecue to Codex 🤖
+## Use with Codex 🤖
 
 The repository is a self-contained skill: `SKILL.md` and `scripts/extract.py` live together. Copy this directory to `~/.codex/skills/huecue` (do not overwrite an existing installation), then create its `.venv` and install `requirements.txt` as above. The skill becomes available on the next turn.
 
@@ -101,7 +95,7 @@ Attach an image and ask:
 
 > $huecue Extract six colors, show the image next to the palette, and list copyable HEX codes.
 
-## What colors are you after? 🎯
+## Palette options 🎯
 
 Intent and image type are independent. The default is `--intent design`.
 
@@ -118,7 +112,7 @@ Intent and image type are independent. The default is `--intent design`.
 
 Exact does not mean every pixel color or original CSS tokens. Percentages always describe approximate groups. Codex infers intent from ordinary wording and does not require a mode selection. Existing checked-in examples predate this option and illustrate the default design behavior. Experimental selection remains separate.
 
-## Under the swatches 🔎
+## How it works 🔎
 
 - **General** (default, six colors): downsample to 256 × 256, median-cut quantization, then weighted clustering in Lab with diverse initial centers. HEX values represent group averages.
 - **UI** (default, eight colors): sample up to 768 × 768 without blending pixels; retain common neutral surfaces and distinct hue accents. HEX values are sampled colors, not inferred design tokens.
@@ -128,13 +122,13 @@ Exact does not mean every pixel color or original CSS tokens. Percentages always
 
 Small details can still be missed. UI mode is heuristic: it does not identify components or recover a design system. A color present in a screenshot can differ from its CSS token due to compositing or color management.
 
-## Your images stay yours 🔒
+## File handling and safety 🔒
 
 Only local, single-frame JPEG, PNG and WebP files are accepted: at most 25 MiB and 20 million pixels. Final-component symlinks and nonregular inputs are rejected. No subprocesses or image-content execution. Exports go to a fresh private folder; originals are not modified. The comparison PNG embeds only a resized preview, without source metadata.
 
 This is **not an OS sandbox**. Choose trusted input/output locations and keep Pillow maintained. Image decoders are dependencies, not a guarantee that arbitrary files are harmless. Installation requires package downloads; extraction itself is offline.
 
-## Tinker with Huecue 🛠️
+## Development 🛠️
 
 ```sh
 .venv/bin/python -m unittest discover -s tests
