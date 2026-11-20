@@ -16,6 +16,17 @@ That sunset. That illustration. That screenshot you keep coming back to. Give Hu
 
 ## A few colorful examples 🖼️
 
+### Illustration · general mode
+
+![Illustration and extracted palette](examples/outputs/illustration/palette.png)
+
+- Midnight blue — `#0A0E33` · ≈71.11%
+- Peach cream — `#FAD3A9` · ≈18.14%
+- Muted violet — `#816599` · ≈6.42%
+- Deep indigo — `#34346B` · ≈3.57%
+- Bright cyan — `#48DEEF` · ≈0.45%
+- Ocean blue — `#3792B0` · ≈0.30%
+
 ### Landscape · general mode
 
 ![Landscape and extracted palette](examples/outputs/landscape/palette.png)
@@ -50,17 +61,6 @@ That sunset. That illustration. That screenshot you keep coming back to. Give Hu
 - Lavender — `#A894C9` · ≈0.47%
 - Dusty blue — `#78A3D1` · ≈0.05%
 - Sage green — `#82AD82` · ≈0.02%
-
-### Illustration · general mode
-
-![Illustration and extracted palette](examples/outputs/illustration/palette.png)
-
-- Midnight blue — `#0A0E33` · ≈71.11%
-- Peach cream — `#FAD3A9` · ≈18.14%
-- Muted violet — `#816599` · ≈6.42%
-- Deep indigo — `#34346B` · ≈3.57%
-- Bright cyan — `#48DEEF` · ≈0.45%
-- Ocean blue — `#3792B0` · ≈0.30%
 
 The landscape and portrait are **AI-generated demo images**, not camera photographs. See [image provenance and prompts](examples/PROVENANCE.md). Each output folder contains copyable `palette.json` and `palette.css` files.
 
