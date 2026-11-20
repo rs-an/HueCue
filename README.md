@@ -20,55 +20,47 @@ That sunset. That illustration. That screenshot you keep coming back to. Give Hu
 
 ![Landscape and extracted palette](examples/outputs/landscape/palette.png)
 
-| HEX | RGB | Approx. share |
-| --- | --- | --- |
-| `#859733` | 133, 151, 51 | 29.48% |
-| `#799CB2` | 121, 156, 178 | 18.73% |
-| `#77ACF2` | 119, 172, 242 | 17.44% |
-| `#2E423A` | 46, 66, 58 | 15.74% |
-| `#526323` | 82, 99, 35 | 12.23% |
-| `#939B60` | 147, 155, 96 | 6.37% |
+- Olive green — `#859733` · ≈29.48%
+- Blue gray — `#799CB2` · ≈18.73%
+- Sky blue — `#77ACF2` · ≈17.44%
+- Deep forest — `#2E423A` · ≈15.74%
+- Moss green — `#526323` · ≈12.23%
+- Sage green — `#939B60` · ≈6.37%
 
 ### Portrait · general mode
 
 ![Portrait and extracted palette](examples/outputs/portrait/palette.png)
 
-| HEX | RGB | Approx. share |
-| --- | --- | --- |
-| `#3A1C20` | 58, 28, 32 | 46.38% |
-| `#59514A` | 89, 81, 74 | 22.42% |
-| `#79868D` | 121, 134, 141 | 13.35% |
-| `#B6886C` | 182, 136, 108 | 11.77% |
-| `#CED6CF` | 206, 214, 207 | 4.56% |
-| `#637D3E` | 99, 125, 62 | 1.52% |
+- Deep burgundy — `#3A1C20` · ≈46.38%
+- Warm gray — `#59514A` · ≈22.42%
+- Slate gray — `#79868D` · ≈13.35%
+- Warm tan — `#B6886C` · ≈11.77%
+- Pale sage — `#CED6CF` · ≈4.56%
+- Leaf green — `#637D3E` · ≈1.52%
 
 ### Interface · UI mode
 
 ![DevNotes interface and extracted palette](examples/outputs/interface/palette.png)
 
-| HEX | RGB | Approx. share |
-| --- | --- | --- |
-| `#292A2D` | 41, 42, 45 | 62.62% |
-| `#202124` | 32, 33, 36 | 30.91% |
-| `#E8EAED` | 232, 234, 237 | 3.57% |
-| `#BDC1C5` | 189, 193, 197 | 1.81% |
-| `#FF6E3F` | 255, 110, 63 | 0.56% |
-| `#A894C9` | 168, 148, 201 | 0.47% |
-| `#78A3D1` | 120, 163, 209 | 0.05% |
-| `#82AD82` | 130, 173, 130 | 0.02% |
+- Charcoal — `#292A2D` · ≈62.62%
+- Near black — `#202124` · ≈30.91%
+- Soft white — `#E8EAED` · ≈3.57%
+- Silver gray — `#BDC1C5` · ≈1.81%
+- Coral orange — `#FF6E3F` · ≈0.56%
+- Lavender — `#A894C9` · ≈0.47%
+- Dusty blue — `#78A3D1` · ≈0.05%
+- Sage green — `#82AD82` · ≈0.02%
 
 ### Illustration · general mode
 
 ![Illustration and extracted palette](examples/outputs/illustration/palette.png)
 
-| HEX | RGB | Approx. share |
-| --- | --- | --- |
-| `#0A0E33` | 10, 14, 51 | 71.11% |
-| `#FAD3A9` | 250, 211, 169 | 18.14% |
-| `#816599` | 129, 101, 153 | 6.42% |
-| `#34346B` | 52, 52, 107 | 3.57% |
-| `#48DEEF` | 72, 222, 239 | 0.45% |
-| `#3792B0` | 55, 146, 176 | 0.30% |
+- Midnight blue — `#0A0E33` · ≈71.11%
+- Peach cream — `#FAD3A9` · ≈18.14%
+- Muted violet — `#816599` · ≈6.42%
+- Deep indigo — `#34346B` · ≈3.57%
+- Bright cyan — `#48DEEF` · ≈0.45%
+- Ocean blue — `#3792B0` · ≈0.30%
 
 The landscape and portrait are **AI-generated demo images**, not camera photographs. See [image provenance and prompts](examples/PROVENANCE.md). Each output folder contains copyable `palette.json` and `palette.css` files.
 
