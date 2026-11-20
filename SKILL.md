@@ -1,9 +1,9 @@
 ---
-name: local-image-palette
+name: image-palette
 description: Извлекает палитру из локального фото, иллюстрации или интерфейса. По запросу выбирает преобладающие цвета либо точные образцы; по умолчанию предлагает палитру для дизайна. Показывает картинку рядом с палитрой и копируемые HEX/RGB. Не редактирует изображение.
 ---
 
-# Local Image Palette
+# Image Palette
 
 ## Choose intent without a mandatory question
 

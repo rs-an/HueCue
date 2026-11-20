@@ -1,4 +1,4 @@
-# Local Image Palette
+# Image Palette
 
 Extract a color palette from an image, entirely on your computer. Compare the source and swatches side by side, copy HEX/RGB values, and export CSS variables or JSON.
 
@@ -93,11 +93,11 @@ The command prints JSON with the new folder path. Colors are sorted by estimated
 
 ## Use as a Codex skill
 
-The repository is a self-contained skill: `SKILL.md` and `scripts/extract.py` live together. Copy this directory to `~/.codex/skills/local-image-palette` (do not overwrite an existing installation), then create its `.venv` and install `requirements.txt` as above. The skill becomes available on the next turn.
+The repository is a self-contained skill: `SKILL.md` and `scripts/extract.py` live together. Copy this directory to `~/.codex/skills/image-palette` (do not overwrite an existing installation), then create its `.venv` and install `requirements.txt` as above. The skill becomes available on the next turn.
 
 Attach an image and ask:
 
-> $local-image-palette Extract six colors, show the image next to the palette, and list copyable HEX codes.
+> $image-palette Extract six colors, show the image next to the palette, and list copyable HEX codes.
 
 ## Extraction intent
 
