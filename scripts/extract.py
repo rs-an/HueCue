@@ -73,7 +73,7 @@ def ui_palette(pixels, count):
                    for v,n in zip(chosen,populations)],key=lambda v:-v['percent'])
 
 
-def extract(path, count, *, include_source=False, mode="general"):
+def extract(path, count, *, include_source=False, mode="general", intent="design"):
     # Open once, reject symlinks, devices and oversized input before decoding.
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     with os.fdopen(fd,'rb') as f:
@@ -99,14 +99,23 @@ def extract(path, count, *, include_source=False, mode="general"):
         if source_preview is not None:
             source_preview.thumbnail((640,640), Image.Resampling.LANCZOS)
         im.thumbnail((768,768) if mode == "ui" else (256,256),
-                     Image.Resampling.NEAREST if mode == "ui" else Image.Resampling.LANCZOS)
+                     Image.Resampling.NEAREST if mode == "ui" or intent == "exact" else Image.Resampling.LANCZOS)
         pixels = [(r,g,b) for r,g,b,a in im.get_flattened_data() if a>=128]
     if not pixels:
         raise ValueError('No visible pixels')
-    if mode == 'ui':
+    if mode == 'ui' and intent != 'dominant':
         colors = ui_palette(pixels, count)
         return (colors, source_preview) if include_source else colors
     strip = Image.new('RGB',(len(pixels),1)); strip.putdata(pixels)
+    if intent == 'dominant':
+        quant = strip.quantize(colors=count, method=Image.Quantize.MEDIANCUT)
+        palette = quant.getpalette()
+        colors = []
+        for population, index in sorted(quant.getcolors(), reverse=True):
+            rgb = tuple(palette[index*3:index*3+3])
+            colors.append({'hex': '#%02X%02X%02X' % rgb, 'rgb': rgb,
+                           'percent': round(100*population/len(pixels), 2)})
+        return (colors, source_preview) if include_source else colors
     q = strip.quantize(colors=256,method=Image.Quantize.MEDIANCUT)
     pal = q.getpalette()
     bins = [(n,tuple(pal[i*3:i*3+3])) for n,i in q.getcolors()]
@@ -138,6 +147,23 @@ def extract(path, count, *, include_source=False, mode="general"):
         n=sum(p for p,_ in group)
         rgb=tuple(round(sum(p*c[k] for p,c in group)/n) for k in range(3))
         result.append({'hex':'#%02X%02X%02X'%rgb,'rgb':rgb,'percent':round(100*n/len(pixels),2)})
+    if intent == 'exact':
+        # Representatives must exist in the normalized source sample.
+        samples = Counter(pixels)
+        sample_labs = [(rgb, lab(rgb), n) for rgb,n in samples.items()]
+        selected = []
+        for item in result:
+            center = lab(item['rgb'])
+            rgb = min(sample_labs, key=lambda v:(distance(v[1],center),-v[2],v[0]))[0]
+            if rgb not in selected: selected.append(rgb)
+        populations = [0]*len(selected)
+        centers = [lab(rgb) for rgb in selected]
+        for rgb, coord, n in sample_labs:
+            j = min(range(len(centers)), key=lambda i:distance(coord, centers[i]))
+            populations[j] += n
+        result = [{'hex':'#%02X%02X%02X'%rgb, 'rgb':rgb,
+                   'percent':round(100*n/len(pixels),2)}
+                  for rgb,n in zip(selected,populations)]
     colors = sorted(result,key=lambda v:-v['percent'])
     return (colors, source_preview) if include_source else colors
 
@@ -174,13 +200,14 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('image',type=Path);p.add_argument('--colors',type=int,default=None,choices=range(2,9))
     p.add_argument('--mode',choices=['general','ui'],default='general')
+    p.add_argument('--intent', choices=['design','dominant','exact'], default='design')
     p.add_argument('--output-root',type=Path,required=True)
     a=p.parse_args()
-    colors, source = extract(a.image,a.colors or (8 if a.mode == "ui" else 6), include_source=True, mode=a.mode)
+    colors, source = extract(a.image,a.colors or (8 if a.mode == "ui" else 6), include_source=True, mode=a.mode, intent=a.intent)
     root=a.output_root.resolve(strict=True)
     if not root.is_dir(): raise ValueError('Output root must be an existing directory')
     out=Path(tempfile.mkdtemp(prefix='palette-',dir=root))
-    data={'mode':a.mode,'method':('UI neutral surfaces and hue accents; nearest Lab shares' if a.mode == 'ui' else '256-bin median cut, weighted Lab clustering, diversity initialization'),'approximate':True,'alpha_threshold':128,'colors':colors}
+    data={'intent':a.intent,'mode':a.mode,'method':('population-oriented median cut' if a.intent=='dominant' else ('UI neutral surfaces and hue accents; nearest Lab shares' if a.mode == 'ui' else '256-bin median cut, weighted Lab clustering, diversity initialization')),'representative':('sampled_srgb' if a.intent=='exact' or (a.mode=='ui' and a.intent=='design') else 'cluster_average'),'approximate':True,'alpha_threshold':128,'colors':colors}
     (out/'palette.json').write_text(json.dumps(data,indent=2)+'\n')
     (out/'palette.css').write_text(':root {\n'+''.join(f"  --palette-{i+1}: {c['hex']};\n" for i,c in enumerate(colors))+'}\n')
     preview(colors, source).save(out/'palette.png')

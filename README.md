@@ -99,6 +99,23 @@ Attach an image and ask:
 
 > $local-image-palette Extract six colors, show the image next to the palette, and list copyable HEX codes.
 
+## Extraction intent
+
+Intent and image type are independent. The default is `--intent design`.
+
+| Intent | Use for | Color values |
+| --- | --- | --- |
+| `design` | A diverse palette for design; current heuristic, not guaranteed accent retention | Group averages for photos/art; samples for UI |
+| `dominant` | Main colors by image area | Quantized representative averages |
+| `exact` | Representative colors actually present | Sampled sRGB values, no final HEX averaging |
+
+```sh
+.venv/bin/python scripts/extract.py examples/inputs/portrait.png --intent exact --output-root output
+.venv/bin/python scripts/extract.py examples/inputs/interface.png --mode ui --intent dominant --output-root output
+```
+
+Exact does not mean every pixel color or original CSS tokens. Percentages always describe approximate groups. Codex infers intent from ordinary wording and does not require a mode selection. Existing checked-in examples predate this option and illustrate the default design behavior. Experimental selection remains separate.
+
 ## How extraction works
 
 - **General** (default, six colors): downsample to 256 × 256, median-cut quantization, then weighted clustering in Lab with diverse initial centers. HEX values represent group averages.
