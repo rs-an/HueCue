@@ -56,7 +56,7 @@ It works as a Codex skill or a Python command-line tool. Images are processed on
 - Dusty blue — `#78A3D1` · ≈0.05%
 - Sage green — `#82AD82` · ≈0.02%
 
-The landscape and portrait are **AI-generated demo images**, not camera photographs. See [image provenance and prompts](examples/PROVENANCE.md). Each output folder contains copyable `palette.json` and `palette.css` files.
+Each output folder contains copyable `palette.json` and `palette.css` files.
 
 ## Quick start ✨
 
@@ -136,4 +136,4 @@ This is **not an OS sandbox**. Choose trusted input/output locations and keep Pi
 
 ## License 📄
 
-Source code: [MIT](LICENSE). Example images are excluded from the code license; see [provenance](examples/PROVENANCE.md).
+Source code: [MIT](LICENSE). Example images are excluded from the code license; see [image usage](examples/IMAGE-USAGE.md).
