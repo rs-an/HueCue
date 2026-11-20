@@ -34,7 +34,9 @@ def ui_palette(pixels, count):
     histogram = Counter(pixels)
     # Exact sampled colors preserve flat UI surfaces instead of averaging them.
     candidates = [(n, rgb, lab(rgb)) for rgb,n in histogram.items()
-                  if n >= max(3, len(pixels)*.00002)]
+                  if n >= (1 if len(pixels) < 64 else 3) and n >= len(pixels)*.00002]
+    if not candidates:
+        candidates = [(n, rgb, lab(rgb)) for rgb, n in histogram.items()]
     candidates.sort(key=lambda v:(-v[0],v[1]))
     neutral = [v for v in candidates if (v[2][1]**2+v[2][2]**2)**.5 < 12]
     chosen = []
@@ -124,7 +126,7 @@ def open_input(path):
     return fd  # Ownership transfers to the Python file descriptor.
 
 
-def extract(path, count, *, include_source=False, mode="general", intent="design"):
+def load_image(path):
     # Open once, reject symlinks, devices and oversized input before decoding.
     fd = open_input(path)
     with os.fdopen(fd,'rb') as f:
@@ -135,23 +137,35 @@ def extract(path, count, *, include_source=False, mode="general", intent="design
     if len(raw)>MAX_BYTES:
         raise ValueError('Image exceeds 25 MiB')
     with Image.open(io.BytesIO(raw), formats=['JPEG','PNG','WEBP']) as src:
+        if src.width * src.height > Image.MAX_IMAGE_PIXELS:
+            raise ValueError('Image exceeds the pixel limit')
         if getattr(src,'n_frames',1) != 1:
             raise ValueError('Animated images are not supported')
         src.load()
         # Respect embedded ICC profiles instead of silently treating them as sRGB.
         icc = src.info.get('icc_profile')
-        im = ImageOps.exif_transpose(src).convert('RGBA')
+        oriented = ImageOps.exif_transpose(src)
+        im = oriented.convert('RGBA')
         if icc:
             from PIL import ImageCms
             alpha = im.getchannel('A')
-            im = ImageCms.profileToProfile(im.convert('RGB'),ImageCms.ImageCmsProfile(io.BytesIO(icc)),ImageCms.createProfile('sRGB'),outputMode='RGB').convert('RGBA')
+            color_input = oriented if oriented.mode in ('RGB', 'CMYK', 'L', 'LAB') else im.convert('RGB')
+            try:
+                im = ImageCms.profileToProfile(color_input, ImageCms.ImageCmsProfile(io.BytesIO(icc)), ImageCms.createProfile('sRGB'), outputMode='RGB').convert('RGBA')
+            except ImageCms.PyCMSError as exc:
+                raise ValueError('Invalid or incompatible ICC color profile') from exc
             im.putalpha(alpha)
-        source_preview = im.copy() if include_source else None
-        if source_preview is not None:
-            source_preview.thumbnail((640,640), Image.Resampling.LANCZOS)
-        im.thumbnail((768,768) if mode == "ui" else (256,256),
-                     Image.Resampling.NEAREST if mode == "ui" or intent == "exact" else Image.Resampling.LANCZOS)
-        pixels = [(r,g,b) for r,g,b,a in im.get_flattened_data() if a>=128]
+    return im
+
+
+def extract(path, count, *, include_source=False, mode="general", intent="design"):
+    im = load_image(path)
+    source_preview = im.copy() if include_source else None
+    if source_preview is not None:
+        source_preview.thumbnail((640,640), Image.Resampling.LANCZOS)
+    im.thumbnail((768,768) if mode == "ui" else (256,256),
+                 Image.Resampling.NEAREST if mode == "ui" or intent == "exact" else Image.Resampling.LANCZOS)
+    pixels = [(r,g,b) for r,g,b,a in im.get_flattened_data() if a>=128]
     if not pixels:
         raise ValueError('No visible pixels')
     if mode == 'ui' and intent != 'dominant':

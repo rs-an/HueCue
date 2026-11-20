@@ -5,7 +5,8 @@ import subprocess
 import sys
 import json
 import unittest
-from PIL import Image
+from unittest.mock import patch
+from PIL import Image, ImageCms
 
 spec = importlib.util.spec_from_file_location("palette", Path(__file__).resolve().parents[1] / "scripts/extract.py")
 palette = importlib.util.module_from_spec(spec)
@@ -57,6 +58,49 @@ class PaletteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             with self.assertRaises((ValueError, OSError)):
                 palette.extract(Path(folder), 6)
+
+    def test_small_ui_preserves_distinct_colors(self):
+        colors = palette.ui_palette([(255, 0, 0), (0, 0, 255)], 2)
+        self.assertEqual({c['hex'] for c in colors}, {'#FF0000', '#0000FF'})
+
+    def test_modes_return_valid_colors_and_exact_samples(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'sample.png'
+            pixels = [(12, 40, 80)] * 60 + [(240, 20, 60)] * 30 + [(90, 200, 100)] * 10
+            im = Image.new('RGB', (10, 10)); im.putdata(pixels); im.save(path)
+            for mode in ('general', 'ui'):
+                for intent in ('design', 'dominant', 'exact'):
+                    with self.subTest(mode=mode, intent=intent):
+                        colors = palette.extract(path, 3, mode=mode, intent=intent)
+                        self.assertTrue(1 <= len(colors) <= 3)
+                        self.assertAlmostEqual(sum(c['percent'] for c in colors), 100, delta=.03)
+                        if intent == 'exact':
+                            self.assertTrue(all(tuple(c['rgb']) in pixels for c in colors))
+
+    def test_input_limits_and_animation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'sample.png'
+            Image.new('RGB', (10, 10), 'red').save(path)
+            with patch.object(palette, 'MAX_BYTES', 10):
+                with self.assertRaises(ValueError): palette.extract(path, 2)
+            with patch.object(Image, 'MAX_IMAGE_PIXELS', 80):
+                with self.assertRaises((ValueError, Image.DecompressionBombWarning)): palette.extract(path, 2)
+            Image.new('RGB', (4, 4), 'red').save(path, save_all=True,
+                append_images=[Image.new('RGB', (4, 4), 'blue')], duration=100)
+            with self.assertRaises(ValueError): palette.extract(path, 2)
+
+    def test_icc_profile_and_exif(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'sample.png'
+            profile = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()
+            im = Image.new('RGB', (4, 8), (40, 90, 160))
+            exif = Image.Exif(); exif[274] = 6
+            im.save(path, icc_profile=profile, exif=exif)
+            normalized = palette.load_image(path)
+            self.assertEqual(normalized.size, (8, 4))
+            self.assertEqual(normalized.getpixel((0, 0)), (40, 90, 160, 255))
+            im.save(path, icc_profile=b'invalid profile')
+            with self.assertRaises((ValueError, OSError)): palette.load_image(path)
 
     def test_ui_keeps_surfaces_and_accents(self):
         pixels = [(32,33,36)]*5000 + [(41,42,45)]*4500 + [(232,234,237)]*400 + [(255,110,63)]*50 + [(120,163,209)]*30 + [(130,173,130)]*20

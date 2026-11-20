@@ -14,24 +14,12 @@ Image.MAX_IMAGE_PIXELS = 20_000_000
 warnings.simplefilter('error', Image.DecompressionBombWarning)
 
 
-def load_image(path):
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
-    with os.fdopen(fd, 'rb') as f:
-        st = os.fstat(f.fileno())
-        if not stat.S_ISREG(st.st_mode) or st.st_size > 25*1024*1024:
-            raise ValueError('Expected a regular image under 25 MiB')
-        data = f.read(25*1024*1024+1)
-    if len(data) > 25*1024*1024: raise ValueError('Input too large')
-    with Image.open(io.BytesIO(data), formats=['PNG', 'JPEG', 'WEBP']) as src:
-        if getattr(src, 'n_frames', 1) != 1: raise ValueError('Animation unsupported')
-        src.load()
-        icc = src.info.get('icc_profile')
-        im = ImageOps.exif_transpose(src).convert('RGBA')
-        if icc:
-            alpha = im.getchannel('A')
-            im = ImageCms.profileToProfile(im.convert('RGB'), ImageCms.ImageCmsProfile(io.BytesIO(icc)), ImageCms.createProfile('sRGB'), outputMode='RGB').convert('RGBA')
-            im.putalpha(alpha)
-    return im
+# Reuse the production decoder and platform-specific input safeguards.
+import importlib.util
+_spec = importlib.util.spec_from_file_location('huecue_core', Path(__file__).resolve().parents[1] / 'scripts/extract.py')
+_core = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_core)
+load_image = _core.load_image
 
 
 def lab(rgb):
