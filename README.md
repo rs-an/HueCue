@@ -60,9 +60,9 @@ Each output folder contains copyable `palette.json` and `palette.css` files.
 
 ## Quick start ✨
 
-Requires Python 3.11+ on macOS or Linux. Windows is not currently supported (the input-file safeguards use POSIX flags).
+Requires Python 3.11+ on macOS, Linux, or Windows.
 
-From the repository directory:
+From the repository directory, on macOS or Linux:
 
 ```sh
 python3 -m venv .venv
@@ -70,6 +70,17 @@ python3 -m venv .venv
 mkdir -p output
 .venv/bin/python scripts/extract.py examples/inputs/landscape.png --output-root output
 ```
+
+On Windows (PowerShell):
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+New-Item -ItemType Directory -Force output | Out-Null
+.\.venv\Scripts\python.exe scripts/extract.py examples/inputs/landscape.png --output-root output
+```
+
+For other commands below, Windows users should replace `.venv/bin/python` with `.\.venv\Scripts\python.exe`. Activating the environment or changing PowerShell execution policy is unnecessary.
 
 For screenshots:
 
@@ -124,7 +135,7 @@ Small details can still be missed. UI mode is heuristic: it does not identify co
 
 ## File handling and safety 🔒
 
-Only local, single-frame JPEG, PNG and WebP files are accepted: at most 25 MiB and 20 million pixels. Final-component symlinks and nonregular inputs are rejected. No subprocesses or image-content execution. Exports go to a fresh private folder; originals are not modified. The comparison PNG embeds only a resized preview, without source metadata.
+Only local, single-frame JPEG, PNG and WebP files are accepted: at most 25 MiB and 20 million pixels. Final-component symlinks and nonregular inputs are rejected. On Windows, reparse points (including cloud placeholders), UNC/device paths, and alternate data streams are also rejected; use a downloaded file on a local drive. No subprocesses or image-content execution. Exports go to a fresh folder (Windows permissions inherit from the output directory); originals are not modified. The comparison PNG embeds only a resized preview, without source metadata.
 
 This is **not an OS sandbox**. Choose trusted input/output locations and keep Pillow maintained. Image decoders are dependencies, not a guarantee that arbitrary files are harmless. Installation requires package downloads; extraction itself is offline.
 

@@ -1,6 +1,9 @@
 import importlib.util
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
+import json
 import unittest
 from PIL import Image
 
@@ -26,9 +29,34 @@ class PaletteTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 palette.extract(path, 6)
             link = Path(folder) / "link.png"
-            link.symlink_to(path)
+            try:
+                link.symlink_to(path)
+            except OSError as exc:
+                if getattr(exc, "winerror", None) == 1314:
+                    self.skipTest("Windows account lacks symlink privilege")
+                raise
             with self.assertRaises(OSError):
                 palette.extract(link, 6)
+
+    def test_cli_exports_with_unicode_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / "цвета sample.png"
+            Image.new("RGB", (8, 8), (255, 10, 26)).save(source)
+            result = subprocess.run(
+                [sys.executable, str(Path(palette.__file__)), str(source),
+                 "--output-root", str(root)], capture_output=True, text=True, check=True)
+            output = Path(json.loads(result.stdout)["folder"])
+            data = json.loads((output / "palette.json").read_text())
+            self.assertEqual(data["colors"][0]["hex"], "#FF0A1A")
+            self.assertIn("#FF0A1A", (output / "palette.css").read_text())
+            with Image.open(output / "palette.png") as preview:
+                self.assertEqual(preview.size, (1200, 800))
+
+    def test_rejects_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaises((ValueError, OSError)):
+                palette.extract(Path(folder), 6)
 
     def test_ui_keeps_surfaces_and_accents(self):
         pixels = [(32,33,36)]*5000 + [(41,42,45)]*4500 + [(232,234,237)]*400 + [(255,110,63)]*50 + [(120,163,209)]*30 + [(130,173,130)]*20

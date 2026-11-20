@@ -73,9 +73,60 @@ def ui_palette(pixels, count):
                    for v,n in zip(chosen,populations)],key=lambda v:-v['percent'])
 
 
+def open_input(path):
+    """Open once without following the final symlink/reparse point."""
+    if os.name != 'nt':
+        return os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+
+    import ctypes
+    from ctypes import wintypes
+    import msvcrt
+
+    # Open the reparse point itself, then inspect that same handle before reading.
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    create = kernel.CreateFileW
+    create.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                       wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
+    create.restype = wintypes.HANDLE
+    close = kernel.CloseHandle
+    close.argtypes = [wintypes.HANDLE]
+    close.restype = wintypes.BOOL
+    file_type = kernel.GetFileType
+    file_type.argtypes = [wintypes.HANDLE]
+    file_type.restype = wintypes.DWORD
+    info = kernel.GetFileInformationByHandleEx
+    info.argtypes = [wintypes.HANDLE, ctypes.c_int, wintypes.LPVOID, wintypes.DWORD]
+    info.restype = wintypes.BOOL
+
+    class AttributeTag(ctypes.Structure):
+        _fields_ = [('attributes', wintypes.DWORD), ('tag', wintypes.DWORD)]
+
+    name = os.path.abspath(os.fspath(path))
+    # Only local drive paths: reject UNC, device namespaces and alternate streams.
+    drive, tail = os.path.splitdrive(name)
+    if len(drive) != 2 or drive[1] != ':' or ':' in tail:
+        raise ValueError('Input must be a local Windows file')
+    handle = create(name, 0x80000000, 1, None, 3, 0x00200000, None)
+    if handle == wintypes.HANDLE(-1).value:
+        raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        attrs = AttributeTag()
+        if file_type(handle) != 1:
+            raise ValueError('Input must be a regular image file')
+        if not info(handle, 9, ctypes.byref(attrs), ctypes.sizeof(attrs)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        if attrs.attributes & (0x400 | 0x10):
+            raise OSError('Directories and reparse points are not supported')
+        fd = msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_BINARY)
+    except BaseException:
+        close(handle)
+        raise
+    return fd  # Ownership transfers to the Python file descriptor.
+
+
 def extract(path, count, *, include_source=False, mode="general", intent="design"):
     # Open once, reject symlinks, devices and oversized input before decoding.
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    fd = open_input(path)
     with os.fdopen(fd,'rb') as f:
         st = os.fstat(f.fileno())
         if not stat.S_ISREG(st.st_mode) or st.st_size > MAX_BYTES:
