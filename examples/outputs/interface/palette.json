@@ -1,0 +1,80 @@
+{
+  "mode": "ui",
+  "method": "UI neutral surfaces and hue accents; nearest Lab shares",
+  "approximate": true,
+  "alpha_threshold": 128,
+  "colors": [
+    {
+      "hex": "#292A2D",
+      "rgb": [
+        41,
+        42,
+        45
+      ],
+      "percent": 62.62
+    },
+    {
+      "hex": "#202124",
+      "rgb": [
+        32,
+        33,
+        36
+      ],
+      "percent": 30.91
+    },
+    {
+      "hex": "#E8EAED",
+      "rgb": [
+        232,
+        234,
+        237
+      ],
+      "percent": 3.57
+    },
+    {
+      "hex": "#BDC1C5",
+      "rgb": [
+        189,
+        193,
+        197
+      ],
+      "percent": 1.81
+    },
+    {
+      "hex": "#FF6E3F",
+      "rgb": [
+        255,
+        110,
+        63
+      ],
+      "percent": 0.56
+    },
+    {
+      "hex": "#A894C9",
+      "rgb": [
+        168,
+        148,
+        201
+      ],
+      "percent": 0.47
+    },
+    {
+      "hex": "#78A3D1",
+      "rgb": [
+        120,
+        163,
+        209
+      ],
+      "percent": 0.05
+    },
+    {
+      "hex": "#82AD82",
+      "rgb": [
+        130,
+        173,
+        130
+      ],
+      "percent": 0.02
+    }
+  ]
+}

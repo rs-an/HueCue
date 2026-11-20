@@ -1,0 +1,62 @@
+{
+  "mode": "general",
+  "method": "256-bin median cut, weighted Lab clustering, diversity initialization",
+  "approximate": true,
+  "alpha_threshold": 128,
+  "colors": [
+    {
+      "hex": "#3A1C20",
+      "rgb": [
+        58,
+        28,
+        32
+      ],
+      "percent": 46.38
+    },
+    {
+      "hex": "#59514A",
+      "rgb": [
+        89,
+        81,
+        74
+      ],
+      "percent": 22.42
+    },
+    {
+      "hex": "#79868D",
+      "rgb": [
+        121,
+        134,
+        141
+      ],
+      "percent": 13.35
+    },
+    {
+      "hex": "#B6886C",
+      "rgb": [
+        182,
+        136,
+        108
+      ],
+      "percent": 11.77
+    },
+    {
+      "hex": "#CED6CF",
+      "rgb": [
+        206,
+        214,
+        207
+      ],
+      "percent": 4.56
+    },
+    {
+      "hex": "#637D3E",
+      "rgb": [
+        99,
+        125,
+        62
+      ],
+      "percent": 1.52
+    }
+  ]
+}
